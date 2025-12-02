@@ -1,0 +1,88 @@
+# ============================================
+# 통합 .gitignore for Quant Trading System
+# ============================================
+
+# API 설정 파일 (민감 정보 보호)
+env_upbit.txt
+backtest/env_upbit.txt
+.env
+.env.local
+.env.*.local
+
+# Python 관련
+# ------------
+# 캐시
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# 가상환경
+venv/
+env/
+ENV/
+end2end_venv/
+
+# 배포
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE 설정
+# ------------
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# 데이터베이스
+# ------------
+*.sqlite
+*.db
+
+# 테스트 파일
+# ------------
+test.py
+test_*.py
+
+# 로그 파일
+# ------------
+*.log
+
+# Jupyter Notebook
+# ------------
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# 데이터 파일 (필요시 주석 해제)
+# ------------
+# data/*.csv
+# *.csv
+
+# 임시 파일
+# ------------
+*.tmp
+*.bak
+*.swp
+*~
+
+# OS 관련
+# ------------
+Thumbs.db
+.DS_Store
+
