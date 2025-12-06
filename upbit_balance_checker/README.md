@@ -9,12 +9,13 @@ Upbit 거래소 관련 유틸리티 및 백테스팅 시스템
 - 보유 중인 암호화폐 목록 출력
 - 주요 통화 (BTC, ETH, XRP 등) 필터링
 
-### 2. 골든크로스 전략 백테스팅 ⭐
-- 가상의 돈으로 골든크로스 전략 시뮬레이션
-- 과거 데이터 기반 성과 분석
+### 2. 골든크로스 + RSI 필터 전략 백테스팅 ⭐ NEW!
+- 골든크로스 신호에 RSI 필터를 추가하여 정확도 향상
+- RSI가 과매수 구간일 때 매수 신호 필터링
+- RSI가 과매도 구간일 때 매도 신호 필터링
+- 가상의 돈으로 전략 시뮬레이션
 - 수익률, MDD, 샤프 비율 등 상세 지표
 - Buy & Hold와 비교
-- 시각화 그래프 제공
 
 ### 3. 실시간 가격 모니터링 ⭐ NEW!
 - 5분 단위로 실시간 가격 조회
@@ -54,15 +55,12 @@ UPBIT_SERVER_URL=https://api.upbit.com
 python check_balance.py
 ```
 
-#### 골든크로스 전략 백테스팅
+#### 골든크로스 + RSI 필터 전략 백테스팅
 ```bash
 python run_backtest.py
 ```
 
-또는 Jupyter 노트북으로 실행:
-```bash
-jupyter notebook backtest_golden_cross.ipynb
-```
+**설정 변경**: `config.py` 파일을 수정하여 전략 파라미터를 조정할 수 있습니다.
 
 #### 실시간 가격 모니터링 (5분 간격)
 ```bash
@@ -125,38 +123,57 @@ python realtime_price_monitor.py --interval 60
 ```
 upbit_balance_checker/
 ├── check_balance.py              # 계좌 잔고 조회
-├── backtest_engine.py            # 백테스팅 엔진 (핵심 모듈)
-├── run_backtest.py               # 백테스팅 실행 스크립트
-├── backtest_golden_cross.ipynb   # Jupyter 노트북 버전
-├── realtime_price_monitor.py     # 실시간 가격 모니터링 ⭐
-├── example_realtime_monitor.py   # 사용 예시
+├── run_backtest.py               # 백테스팅 실행 스크립트 ⭐
+├── backtest_config.py            # 전략 설정 파일 (변경 가능)
+├── strategy/                     # 전략 모듈
+│   ├── __init__.py
+│   ├── indicators.py            # 공통 지표 함수 (SMA, RSI 등)
+│   ├── golden_cross_rsi.py      # 골든크로스 + RSI 전략
+│   └── backtest_engine.py       # 백테스팅 엔진
+├── realtime_price_monitor.py     # 실시간 가격 모니터링
 ├── requirements.txt
 └── README.md
 ```
 
-## 🎯 백테스팅 시스템 사용법
+## 🎯 골든크로스 + RSI 필터 전략 사용법
 
-### 기본 사용
-```python
-from backtest_engine import BacktestEngine
-import pandas as pd
-
-# 데이터 준비 (날짜, 종가 컬럼 필요)
-df = pd.DataFrame(...)
-
-# 백테스팅 실행
-engine = BacktestEngine(initial_cash=1_000_000, commission=0.0005)
-result = engine.run(df, fast_period=20, slow_period=50)
-
-# 결과 확인
-BacktestEngine.print_results(result)
+### 기본 실행
+```bash
+python run_backtest.py
 ```
 
-### 커스터마이징
-- `initial_cash`: 초기 자본금 (기본 100만원)
-- `commission`: 수수료율 (기본 0.05%)
-- `fast_period`: 단기 이동평균 기간 (기본 20)
-- `slow_period`: 장기 이동평균 기간 (기본 50)
+### 설정 변경 (backtest_config.py)
+
+`backtest_config.py` 파일을 열어서 다음 값들을 변경할 수 있습니다:
+
+```python
+# 이동평균선 설정
+FAST_PERIOD = 20      # 단기 이동평균 기간
+SLOW_PERIOD = 50      # 장기 이동평균 기간
+
+# RSI 설정
+RSI_PERIOD = 14       # RSI 계산 기간
+RSI_BUY_THRESHOLD = 50.0   # 매수 시 RSI 최대값 (이 값 이하일 때만 매수)
+RSI_SELL_THRESHOLD = 70.0  # 매도 시 RSI 최소값 (이 값 이상일 때만 매도)
+
+# 백테스트 설정
+INITIAL_CASH = 1_000_000  # 초기 자본금
+COMMISSION = 0.0005        # 수수료율
+
+# 데이터 설정
+MARKET = 'KRW-BTC'    # 거래할 마켓
+DAYS = 365            # 수집할 일수
+```
+
+### 전략 설명
+
+**골든크로스 + RSI 필터 전략**:
+1. 골든크로스 발생 시 → 매수 신호
+2. **하지만** RSI가 50 이상이면 → 매수 취소 (과매수 구간)
+3. 데드크로스 발생 시 → 매도 신호
+4. **하지만** RSI가 70 미만이면 → 매도 취소 (아직 과매수 아님)
+
+이렇게 하면 **더 정확한 진입 타이밍**을 잡을 수 있습니다!
 
 ## 📡 실시간 가격 모니터링 사용법
 
