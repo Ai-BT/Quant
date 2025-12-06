@@ -4,7 +4,7 @@
 간단하게 사용하는 방법
 """
 
-from realtime_price_monitor import PriceMonitor
+from uitls.realtime_price_monitor import PriceMonitor
 
 # 기본 사용 (비트코인, 5분 간격)
 monitor = PriceMonitor(market='KRW-BTC', interval=30)  # 300초 = 5분

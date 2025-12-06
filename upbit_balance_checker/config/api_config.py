@@ -5,7 +5,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # env_upbit.txt 파일 경로
-env_path = Path(__file__).parent.parent / 'env_upbit.txt'
+env_path = Path(__file__).parent / 'env_upbit.txt'
 print(f"📂 설정 파일 경로: {env_path}")
 print(f"📂 파일 존재 여부: {env_path.exists()}")
 
