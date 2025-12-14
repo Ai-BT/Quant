@@ -1,23 +1,29 @@
 """
-단순 골든크로스 전략
+SMA 골든크로스 전략 구현
 
-RSI 필터 없이 순수하게 이동평균선 크로스만 사용하는 전략
+단순 이동평균선의 크로스를 이용한 매매 전략
 """
 
 import pandas as pd
 import numpy as np
-from .indicators import calculate_sma
+import sys
+from pathlib import Path
+
+# 상위 디렉토리의 모듈 import를 위한 경로 추가
+sys.path.append(str(Path(__file__).parent.parent.parent))
+
+from core.indicators import calculate_sma
 
 
-class SimpleGoldenCrossStrategy:
+class SMAStrategy:
     """
-    단순 골든크로스 전략
+    SMA 골든크로스 전략
     
     - 골든크로스: 매수 신호
     - 데드크로스: 매도 신호
     """
     
-    def __init__(self, fast_period: int = 20, slow_period: int = 50):
+    def __init__(self, fast_period: int = 5, slow_period: int = 30):
         """
         Parameters
         ----------
@@ -28,6 +34,7 @@ class SimpleGoldenCrossStrategy:
         """
         self.fast_period = fast_period
         self.slow_period = slow_period
+        self.name = f"SMA {fast_period}/{slow_period} 골든크로스"
     
     def generate_signals(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -99,6 +106,7 @@ class SimpleGoldenCrossStrategy:
         )
         
         return {
+            'strategy_name': self.name,
             'golden_cross_count': golden_crosses.sum(),
             'dead_cross_count': dead_crosses.sum(),
             'total_crosses': golden_crosses.sum() + dead_crosses.sum()

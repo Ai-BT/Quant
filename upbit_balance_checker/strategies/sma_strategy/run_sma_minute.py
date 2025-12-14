@@ -1,117 +1,22 @@
 """
-분봉 기반 SMA 골든크로스 전략 백테스팅
+분봉 SMA 골든크로스 전략
 
-1분봉 데이터를 수집하여 5분봉/30분봉 이동평균선을 계산하고
+1분봉 데이터로 5분/30분 이동평균선을 계산하고
 1시간 간격으로 거래 신호를 확인하는 전략
 """
 
+import sys
+from pathlib import Path
+
+# 프로젝트 루트를 경로에 추가
+project_root = Path(__file__).parent.parent.parent
+sys.path.append(str(project_root))
+
 import pandas as pd
-import requests
-import time
-from datetime import datetime, timedelta
-
-from strategy.simple_golden_cross import SimpleGoldenCrossStrategy
-from strategy.backtest_engine import BacktestEngine
-
-# 설정 파일 import
-import config.sma_minute_config as cfg
-
-
-def fetch_minute_data(market: str, minutes: int = 1, count: int = 1000):
-    """
-    Upbit API에서 분봉 데이터 수집
-    
-    Parameters
-    ----------
-    market : str
-        마켓 코드
-    minutes : int
-        분봉 단위 (1, 3, 5, 10, 15, 30, 60, 240)
-    count : int
-        수집할 캔들 개수
-    
-    Returns
-    -------
-    pd.DataFrame
-        가격 데이터
-    """
-    url = f"https://api.upbit.com/v1/candles/minutes/{minutes}"
-    headers = {"accept": "application/json"}
-    
-    all_data = []
-    last_timestamp = None
-    
-    print(f"📡 {market} {minutes}분봉 데이터 수집 중...")
-    
-    while len(all_data) < count:
-        params = {
-            'market': market,
-            'count': min(200, count - len(all_data)),
-        }
-        
-        if last_timestamp:
-            params['to'] = last_timestamp
-        
-        try:
-            response = requests.get(url, params=params, headers=headers)
-            response.raise_for_status()
-            data = response.json()
-            
-            if not data:
-                break
-            
-            all_data.extend(data)
-            last_timestamp = data[-1]['candle_date_time_utc']
-            
-            print(f"   수집 완료: {len(all_data)}/{count}개")
-            time.sleep(0.1)  # API 요청 제한 방지
-            
-        except Exception as e:
-            print(f"⚠️  데이터 수집 중 오류 발생: {e}")
-            break
-    
-    print(f"✅ 총 {len(all_data)}개 캔들 수집 완료!\n")
-    
-    df = pd.DataFrame(all_data)
-    df['날짜'] = pd.to_datetime(df['candle_date_time_kst'])
-    df = df.sort_values('날짜').reset_index(drop=True)
-    df['종가'] = df['trade_price']
-    df['시가'] = df['opening_price']
-    df['고가'] = df['high_price']
-    df['저가'] = df['low_price']
-    df['거래량'] = df['candle_acc_trade_volume']
-    
-    return df
-
-
-def resample_to_minutes(df: pd.DataFrame, minutes: int) -> pd.DataFrame:
-    """
-    1분봉 데이터를 N분봉으로 리샘플링
-    
-    Parameters
-    ----------
-    df : pd.DataFrame
-        1분봉 데이터
-    minutes : int
-        리샘플링할 분봉 단위
-    
-    Returns
-    -------
-    pd.DataFrame
-        리샘플링된 데이터
-    """
-    df = df.set_index('날짜')
-    
-    resampled = pd.DataFrame()
-    resampled['종가'] = df['종가'].resample(f'{minutes}T').last()
-    resampled['시가'] = df['시가'].resample(f'{minutes}T').first()
-    resampled['고가'] = df['고가'].resample(f'{minutes}T').max()
-    resampled['저가'] = df['저가'].resample(f'{minutes}T').min()
-    resampled['거래량'] = df['거래량'].resample(f'{minutes}T').sum()
-    
-    resampled = resampled.dropna().reset_index()
-    
-    return resampled
+from strategies.sma_strategy.strategy import SMAStrategy
+from strategies.sma_strategy.config import SMA_MINUTE_CONFIG
+from core.backtest_engine import BacktestEngine
+from core.data_fetcher import fetch_minute_data
 
 
 def filter_hourly_signals(df: pd.DataFrame, signals: pd.DataFrame, interval_minutes: int = 60) -> pd.DataFrame:
@@ -160,26 +65,28 @@ def filter_hourly_signals(df: pd.DataFrame, signals: pd.DataFrame, interval_minu
 
 def main():
     """메인 함수"""
+    config = SMA_MINUTE_CONFIG
+    
     print("=" * 70)
-    print("🚀 분봉 SMA 골든크로스 전략 백테스팅")
+    print(f"🚀 {config['name']}")
     print("=" * 70)
     print()
     
     # 설정 출력
     print("📋 전략 설정:")
     print(f"   - 전략: 분봉 골든크로스 (1분봉 데이터 기반)")
-    print(f"   - 이동평균: SMA{cfg.FAST_PERIOD}분/{cfg.SLOW_PERIOD}분")
-    print(f"   - 거래 간격: {cfg.TRADE_INTERVAL}분마다 (1시간)")
-    print(f"   - 코인: {cfg.MARKET}")
-    print(f"   - 초기 자본: {cfg.INITIAL_CASH:,}원")
-    print(f"   - 수수료: {cfg.COMMISSION * 100}%")
+    print(f"   - 이동평균: SMA{config['fast_period']}캔들/{config['slow_period']}캔들")
+    print(f"   - 거래 간격: {config['trade_interval']}분마다")
+    print(f"   - 코인: {config['market']}")
+    print(f"   - 초기 자본: {config['initial_cash']:,}원")
+    print(f"   - 수수료: {config['commission'] * 100}%")
     print()
     
     # 1분봉 데이터 수집
     df_1min = fetch_minute_data(
-        market=cfg.MARKET, 
-        minutes=cfg.CANDLE_MINUTES,
-        count=cfg.CANDLES_COUNT
+        market=config['market'], 
+        minutes=config['candle_minutes'],
+        count=config['candles_count']
     )
     
     print(f"📅 분석 기간: {df_1min.iloc[0]['날짜'].strftime('%Y-%m-%d %H:%M')} ~ {df_1min.iloc[-1]['날짜'].strftime('%Y-%m-%d %H:%M')}")
@@ -192,20 +99,20 @@ def main():
     print(f"📊 분석 기간: {hours:.1f}시간 ({hours/24:.1f}일)")
     print()
     
-    # 전략 생성 (분봉 기준)
-    strategy = SimpleGoldenCrossStrategy(
-        fast_period=cfg.FAST_PERIOD,
-        slow_period=cfg.SLOW_PERIOD
+    # 전략 생성 (캔들 기준 - 5개 캔들 vs 30개 캔들)
+    strategy = SMAStrategy(
+        fast_period=config['fast_period'],
+        slow_period=config['slow_period']
     )
     
     # 신호 생성 (1분봉 데이터로)
     all_signals = strategy.generate_signals(df_1min)
     
-    # 1시간 간격으로 필터링
+    # 거래 간격으로 필터링
     filtered_signals = filter_hourly_signals(
         df_1min, 
         all_signals, 
-        interval_minutes=cfg.TRADE_INTERVAL
+        interval_minutes=config['trade_interval']
     )
     
     # 필터링된 신호 통계
@@ -215,8 +122,8 @@ def main():
     print("=" * 70)
     print("📊 전략 통계")
     print("=" * 70)
-    print(f"📈 매수 신호: {buy_signals}회 ({cfg.TRADE_INTERVAL}분 간격)")
-    print(f"📉 매도 신호: {sell_signals}회 ({cfg.TRADE_INTERVAL}분 간격)")
+    print(f"📈 매수 신호: {buy_signals}회 ({config['trade_interval']}분 간격)")
+    print(f"📉 매도 신호: {sell_signals}회 ({config['trade_interval']}분 간격)")
     print(f"🔄 총 거래 신호: {buy_signals + sell_signals}회")
     print()
     
@@ -227,8 +134,8 @@ def main():
     print()
     
     engine = BacktestEngine(
-        initial_cash=cfg.INITIAL_CASH,
-        commission=cfg.COMMISSION
+        initial_cash=config['initial_cash'],
+        commission=config['commission']
     )
     
     result = engine.run(df_1min, filtered_signals)
@@ -267,10 +174,12 @@ def main():
     
     print("=" * 70)
     print("\n💡 설정 변경:")
-    print("   - 코인 변경: config/sma_minute_config.py 파일의 MARKET 변수 수정")
-    print("   - 이동평균 기간: FAST_PERIOD, SLOW_PERIOD 수정")
-    print("   - 거래 간격: TRADE_INTERVAL 수정 (분 단위)")
-    print("   - 데이터 양: CANDLES_COUNT 수정")
+    print("   - 코인 변경: strategies/sma_strategy/config.py의 SMA_MINUTE_CONFIG 수정")
+    print("   - 이동평균 기간: fast_period, slow_period 수정")
+    print("   - 거래 간격: trade_interval 수정 (분 단위)")
+    print("   - 데이터 양: candles_count 수정")
+    print("\n⚠️  참고: 이 전략은 5개 캔들 vs 30개 캔들의 이동평균을 비교합니다.")
+    print("         (진짜 5분봉 vs 30분봉이 아니라, 1분봉 5개 vs 1분봉 30개)")
 
 
 if __name__ == "__main__":
