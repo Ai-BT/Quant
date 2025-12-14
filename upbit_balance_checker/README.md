@@ -9,7 +9,19 @@ Upbit 거래소 관련 유틸리티 및 백테스팅 시스템
 - 보유 중인 암호화폐 목록 출력
 - 주요 통화 (BTC, ETH, XRP 등) 필터링
 
-### 2. 골든크로스 + RSI 필터 전략 백테스팅 ⭐ NEW!
+### 2. 백테스팅 전략
+
+#### 2-1. SMA 5/20 골든크로스 전략 ⭐ NEW!
+- 단기(5일)와 중기(20일) 이동평균선 크로스 전략
+- 빠른 신호, 단기 트레이딩에 적합
+- 코인 변경 가능 (BTC, ETH, XRP, SOL 등)
+
+#### 2-2. SMA 20/50 골든크로스 전략 ⭐ NEW!
+- 중기(20일)와 장기(50일) 이동평균선 크로스 전략
+- 안정적인 신호, 중장기 투자에 적합
+- 코인 변경 가능 (BTC, ETH, XRP, SOL 등)
+
+#### 2-3. 골든크로스 + RSI 필터 전략
 - 골든크로스 신호에 RSI 필터를 추가하여 정확도 향상
 - RSI가 과매수 구간일 때 매수 신호 필터링
 - RSI가 과매도 구간일 때 매도 신호 필터링
@@ -55,12 +67,32 @@ UPBIT_SERVER_URL=https://api.upbit.com
 python check_balance.py
 ```
 
+#### SMA 5/20 전략 백테스팅
+```bash
+python run_sma5_20.py
+```
+
+**코인 변경**: `config/sma5_20_config.py` 파일의 `MARKET` 변수를 수정하세요.
+```python
+MARKET = 'KRW-BTC'   # 비트코인 (기본값)
+MARKET = 'KRW-ETH'   # 이더리움
+MARKET = 'KRW-XRP'   # 리플
+MARKET = 'KRW-SOL'   # 솔라나
+```
+
+#### SMA 20/50 전략 백테스팅
+```bash
+python run_sma20_50.py
+```
+
+**코인 변경**: `config/sma20_50_config.py` 파일의 `MARKET` 변수를 수정하세요.
+
 #### 골든크로스 + RSI 필터 전략 백테스팅
 ```bash
 python run_backtest.py
 ```
 
-**설정 변경**: `config.py` 파일을 수정하여 전략 파라미터를 조정할 수 있습니다.
+**설정 변경**: `config/goldcross_rsi_config.py` 파일을 수정하여 전략 파라미터를 조정할 수 있습니다.
 
 #### 실시간 가격 모니터링 (5분 간격)
 ```bash
@@ -123,11 +155,17 @@ python realtime_price_monitor.py --interval 60
 ```
 upbit_balance_checker/
 ├── check_balance.py              # 계좌 잔고 조회
-├── run_backtest.py               # 백테스팅 실행 스크립트 ⭐
-├── backtest_config.py            # 전략 설정 파일 (변경 가능)
+├── run_sma5_20.py                # SMA 5/20 전략 실행 ⭐ NEW
+├── run_sma20_50.py               # SMA 20/50 전략 실행 ⭐ NEW
+├── run_backtest.py               # 골든크로스 + RSI 전략 실행
+├── config/                       # 설정 파일 폴더
+│   ├── sma5_20_config.py        # SMA 5/20 전략 설정 (코인 변경 가능) ⭐
+│   ├── sma20_50_config.py       # SMA 20/50 전략 설정 (코인 변경 가능) ⭐
+│   └── goldcross_rsi_config.py  # 골든크로스 + RSI 전략 설정
 ├── strategy/                     # 전략 모듈
 │   ├── __init__.py
 │   ├── indicators.py            # 공통 지표 함수 (SMA, RSI 등)
+│   ├── simple_golden_cross.py   # 단순 골든크로스 전략 ⭐
 │   ├── golden_cross_rsi.py      # 골든크로스 + RSI 전략
 │   └── backtest_engine.py       # 백테스팅 엔진
 ├── realtime_price_monitor.py     # 실시간 가격 모니터링
@@ -135,17 +173,57 @@ upbit_balance_checker/
 └── README.md
 ```
 
-## 🎯 골든크로스 + RSI 필터 전략 사용법
+## 🎯 백테스팅 전략 상세 설명
 
-### 기본 실행
+### 1️⃣ SMA 5/20 전략
+
+**특징**: 빠른 반응, 단기 트레이딩에 적합
+
+```bash
+python run_sma5_20.py
+```
+
+**설정 변경** (`config/sma5_20_config.py`):
+```python
+FAST_PERIOD = 5       # 단기 이동평균 (5일)
+SLOW_PERIOD = 20      # 중기 이동평균 (20일)
+MARKET = 'KRW-BTC'    # 비트코인 (변경 가능)
+INITIAL_CASH = 1_000_000
+```
+
+**코인 변경 예시**:
+```python
+MARKET = 'KRW-ETH'   # 이더리움
+MARKET = 'KRW-XRP'   # 리플
+MARKET = 'KRW-SOL'   # 솔라나
+MARKET = 'KRW-DOGE'  # 도지코인
+```
+
+### 2️⃣ SMA 20/50 전략
+
+**특징**: 안정적인 신호, 중장기 투자에 적합
+
+```bash
+python run_sma20_50.py
+```
+
+**설정 변경** (`config/sma20_50_config.py`):
+```python
+FAST_PERIOD = 20      # 중기 이동평균 (20일)
+SLOW_PERIOD = 50      # 장기 이동평균 (50일)
+MARKET = 'KRW-BTC'    # 비트코인 (변경 가능)
+INITIAL_CASH = 1_000_000
+```
+
+### 3️⃣ 골든크로스 + RSI 필터 전략
+
+**특징**: RSI 필터로 정확도 향상
+
 ```bash
 python run_backtest.py
 ```
 
-### 설정 변경 (backtest_config.py)
-
-`backtest_config.py` 파일을 열어서 다음 값들을 변경할 수 있습니다:
-
+**설정 변경** (`config/goldcross_rsi_config.py`):
 ```python
 # 이동평균선 설정
 FAST_PERIOD = 20      # 단기 이동평균 기간
@@ -153,27 +231,27 @@ SLOW_PERIOD = 50      # 장기 이동평균 기간
 
 # RSI 설정
 RSI_PERIOD = 14       # RSI 계산 기간
-RSI_BUY_THRESHOLD = 50.0   # 매수 시 RSI 최대값 (이 값 이하일 때만 매수)
-RSI_SELL_THRESHOLD = 70.0  # 매도 시 RSI 최소값 (이 값 이상일 때만 매도)
-
-# 백테스트 설정
-INITIAL_CASH = 1_000_000  # 초기 자본금
-COMMISSION = 0.0005        # 수수료율
+RSI_BUY_THRESHOLD = 50.0   # 매수 시 RSI 최대값
+RSI_SELL_THRESHOLD = 70.0  # 매도 시 RSI 최소값
 
 # 데이터 설정
-MARKET = 'KRW-BTC'    # 거래할 마켓
+MARKET = 'KRW-BTC'    # 거래할 마켓 (변경 가능)
 DAYS = 365            # 수집할 일수
 ```
 
-### 전략 설명
-
-**골든크로스 + RSI 필터 전략**:
+**전략 설명**:
 1. 골든크로스 발생 시 → 매수 신호
 2. **하지만** RSI가 50 이상이면 → 매수 취소 (과매수 구간)
 3. 데드크로스 발생 시 → 매도 신호
 4. **하지만** RSI가 70 미만이면 → 매도 취소 (아직 과매수 아님)
 
-이렇게 하면 **더 정확한 진입 타이밍**을 잡을 수 있습니다!
+### 🔄 전략 비교
+
+| 전략 | 단기(5일) | 중기(20일) | 장기(50일) | RSI 필터 | 특징 |
+|------|----------|-----------|-----------|---------|------|
+| SMA 5/20 | ✅ | ✅ | ❌ | ❌ | 빠른 반응, 많은 거래 |
+| SMA 20/50 | ❌ | ✅ | ✅ | ❌ | 안정적, 적은 거래 |
+| GC + RSI | ❌ | ✅ | ✅ | ✅ | 정확도 높음 |
 
 ## 📡 실시간 가격 모니터링 사용법
 
