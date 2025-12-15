@@ -59,12 +59,15 @@ def fetch_daily_data(market: str, days: int):
     
     df = pd.DataFrame(all_data)
     df['날짜'] = pd.to_datetime(df['candle_date_time_kst'])
-    df = df.sort_values('날짜').reset_index(drop=True)
+    df = df.sort_values('날짜')
     df['종가'] = df['trade_price']
     df['시가'] = df['opening_price']
     df['고가'] = df['high_price']
     df['저가'] = df['low_price']
     df['거래량'] = df['candle_acc_trade_volume']
+    
+    # 날짜를 인덱스로 설정
+    df = df.set_index('날짜')
     
     return df
 
@@ -126,12 +129,16 @@ def fetch_minute_data(market: str, minutes: int = 1, count: int = 1000):
     
     df = pd.DataFrame(all_data)
     df['날짜'] = pd.to_datetime(df['candle_date_time_kst'])
-    df = df.sort_values('날짜').reset_index(drop=True)
+    df = df.sort_values('날짜')
     df['종가'] = df['trade_price']
     df['시가'] = df['opening_price']
     df['고가'] = df['high_price']
     df['저가'] = df['low_price']
     df['거래량'] = df['candle_acc_trade_volume']
     
+    # 날짜를 인덱스로 설정
+    df = df.set_index('날짜')
+    
     return df
+
 

@@ -172,7 +172,7 @@ class BacktestEngine:
         )
         
         for i in range(len(df)):
-            date = df.iloc[i]['날짜']
+            date = df.index[i]  # 날짜가 이제 인덱스
             price = df.iloc[i]['종가']
             position = df.iloc[i]['position']
             
@@ -242,9 +242,13 @@ class BacktestEngine:
         # Buy & Hold
         buy_hold_return = ((df.iloc[-1]['종가'] / df.iloc[0]['종가']) - 1) * 100
         
+        # 순이익
+        net_profit = final_value - self.initial_cash
+        
         return {
             'initial_cash': self.initial_cash,
             'final_value': final_value,
+            'net_profit': net_profit,
             'total_return': total_return,
             'buy_hold_return': buy_hold_return,
             'mdd': mdd,
