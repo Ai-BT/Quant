@@ -25,3 +25,4 @@ SOL 코인을 대상으로 하는 실시간 SMA (Simple Moving Average) 골든�
 - 실시간으로 Upbit API를 통해 가격을 조회합니다
 
 
+

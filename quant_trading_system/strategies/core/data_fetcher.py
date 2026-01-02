@@ -142,3 +142,4 @@ def fetch_minute_data(market: str, minutes: int = 1, count: int = 1000):
     return df
 
 
+

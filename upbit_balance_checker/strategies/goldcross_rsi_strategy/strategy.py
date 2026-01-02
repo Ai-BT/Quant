@@ -4,17 +4,9 @@
 골든크로스 신호에 RSI 필터를 추가하여 신호의 정확도를 높이는 전략
 """
 
-import sys
-from pathlib import Path
 import pandas as pd
 from typing import Dict, Optional
-
-# 프로젝트 루트 경로 추가
-project_root = Path(__file__).parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
-
-from core.indicators import calculate_sma, calculate_rsi, detect_golden_cross, detect_dead_cross
+from .indicators import calculate_sma, calculate_rsi, detect_golden_cross, detect_dead_cross
 
 
 class GoldenCrossRSIStrategy:
@@ -129,7 +121,7 @@ class GoldenCrossRSIStrategy:
             rsi_status = "과매수" if latest['RSI'] > 70 else "과매도" if latest['RSI'] < 30 else "보통"
             
             return {
-                'date': df.index[-1],  # 날짜가 인덱스이므로 인덱스로 접근
+                'date': latest['날짜'],
                 'price': latest['종가'],
                 'sma_fast': latest['SMA_fast'],
                 'sma_slow': latest['SMA_slow'],

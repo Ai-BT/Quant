@@ -4,16 +4,6 @@
 변경 가능한 설정값들
 """
 
-import sys
-from pathlib import Path
-
-# 프로젝트 루트 경로 추가
-project_root = Path(__file__).parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
-
-from global_config import get_market, INITIAL_CASH, COMMISSION
-
 # ============================================
 # 전략 설정
 # ============================================
@@ -31,12 +21,13 @@ RSI_SELL_THRESHOLD = 70.0  # 매도 시 RSI 최소값 (이 값 이상일 때만 
 # 백테스트 설정
 # ============================================
 
-# INITIAL_CASH와 COMMISSION은 global_config에서 가져옴
+INITIAL_CASH = 1_000_000  # 초기 자본금 (100만원)
+COMMISSION = 0.0005        # 수수료율 (0.05%)
 
 # ============================================
 # 데이터 수집 설정
 # ============================================
 
-MARKET = get_market('goldcross_rsi')  # global_config에서 가져옴
+MARKET = 'KRW-BTC'    # 거래할 마켓
 DAYS = 365            # 수집할 일수 (1년)
 

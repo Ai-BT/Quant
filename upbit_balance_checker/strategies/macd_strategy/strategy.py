@@ -289,3 +289,8 @@ class MACDTrendStrategy:
 
 
 
+
+
+
+
+

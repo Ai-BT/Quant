@@ -8,3 +8,8 @@ SMA (Simple Moving Average) 골든크로스 전략
 
 
 
+
+
+
+
+

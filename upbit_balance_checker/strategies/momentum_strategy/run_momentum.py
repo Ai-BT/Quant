@@ -52,7 +52,7 @@ def main():
         days=config['candles_count']
     )
     
-    print(f"📅 분석 기간: {df.index[0].strftime('%Y-%m-%d')} ~ {df.index[-1].strftime('%Y-%m-%d')}")
+    print(f"📅 분석 기간: {df.iloc[0]['날짜'].strftime('%Y-%m-%d')} ~ {df.iloc[-1]['날짜'].strftime('%Y-%m-%d')}")
     print(f"📊 시작 가격: {df.iloc[0]['종가']:,.0f}원")
     print(f"📊 종료 가격: {df.iloc[-1]['종가']:,.0f}원")
     
@@ -106,9 +106,10 @@ def main():
         print("-" * 70)
         for trade in result['trades'][-10:]:
             trade_type = "매수" if trade.type == 'BUY' else "매도"
-            # 해당 날짜의 모멘텀 찾기 (날짜가 인덱스이므로 직접 인덱스로 접근)
-            if trade.date in df.index and trade.date in signals.index:
-                momentum = signals.loc[trade.date, 'momentum']
+            # 해당 날짜의 모멘텀 찾기
+            idx = df[df['날짜'] == trade.date].index
+            if len(idx) > 0 and idx[0] in signals.index:
+                momentum = signals.loc[idx[0], 'momentum']
                 momentum_str = f"모멘텀: {momentum*100:+6.2f}%" if pd.notna(momentum) else "모멘텀: N/A"
             else:
                 momentum_str = "모멘텀: N/A"
@@ -122,25 +123,12 @@ def main():
     print("💡 최종 평가")
     print("=" * 70)
     
-    excess = result['total_return'] - result['buy_hold_return']
-    
     if result['total_return'] > result['buy_hold_return']:
-        if result['total_return'] > 0 and result['buy_hold_return'] > 0:
-            # 둘 다 수익
-            print(f"✅ 전략이 Buy & Hold보다 {excess:.2f}%p 더 수익을 냈습니다!")
-        elif result['total_return'] > 0 and result['buy_hold_return'] < 0:
-            # 전략은 수익, Buy & Hold는 손실
-            print(f"✅ 전략이 수익({result['total_return']:.2f}%)을 냈고, Buy & Hold({result['buy_hold_return']:.2f}%)보다 {excess:.2f}%p 더 좋습니다!")
-        else:
-            # 둘 다 손실이지만 전략이 덜 손실
-            print(f"✅ 전략이 Buy & Hold보다 {excess:.2f}%p 덜 손실을 냈습니다! (전략: {result['total_return']:.2f}%, Buy & Hold: {result['buy_hold_return']:.2f}%)")
+        excess = result['total_return'] - result['buy_hold_return']
+        print(f"✅ 전략이 Buy & Hold보다 {excess:.2f}%p 더 수익을 냈습니다!")
     else:
-        deficit = -excess
-        if result['total_return'] < 0 and result['buy_hold_return'] < 0:
-            # 둘 다 손실이지만 전략이 더 손실
-            print(f"⚠️  전략이 Buy & Hold보다 {deficit:.2f}%p 더 손실을 냈습니다. (전략: {result['total_return']:.2f}%, Buy & Hold: {result['buy_hold_return']:.2f}%)")
-        else:
-            print(f"⚠️  전략이 Buy & Hold보다 {deficit:.2f}%p 적게 수익을 냈습니다.")
+        deficit = result['buy_hold_return'] - result['total_return']
+        print(f"⚠️  전략이 Buy & Hold보다 {deficit:.2f}%p 적게 수익을 냈습니다.")
     
     if result['sharpe_ratio'] > 1:
         print(f"✅ 샤프 비율 {result['sharpe_ratio']:.2f}: 위험 대비 수익이 좋습니다!")

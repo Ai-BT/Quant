@@ -4,16 +4,6 @@
 다양한 모멘텀 전략 설정을 정의
 """
 
-import sys
-from pathlib import Path
-
-# 프로젝트 루트 경로 추가
-project_root = Path(__file__).parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
-
-from global_config import get_market, get_candles_count, INITIAL_CASH, COMMISSION
-
 # ============================================
 # 20일 모멘텀 전략 설정
 # ============================================
@@ -22,10 +12,10 @@ MOMENTUM_20_CONFIG = {
     'lookback_period': 20,        # 모멘텀 계산 기간 (일)
     'buy_threshold': 0.05,        # 매수 기준: 5% 이상 상승
     'sell_threshold': -0.03,      # 매도 기준: -3% 이하 하락
-    'initial_cash': INITIAL_CASH,
-    'commission': COMMISSION,
-    'market': get_market('momentum'),  # global_config에서 가져옴
-    'candles_count': get_candles_count('daily'),
+    'initial_cash': 1_000_000,
+    'commission': 0.0005,
+    'market': 'KRW-XRP', # BTC, XRP, ETH, SOL, DOGE, ADA, DOT, LTC, BCH, XLM, LINK, XMR, EOS, ETC
+    'candles_count': 365,
 }
 
 # ============================================
@@ -36,10 +26,10 @@ MOMENTUM_10_CONFIG = {
     'lookback_period': 10,        # 10일 모멘텀
     'buy_threshold': 0.03,        # 매수 기준: 3% 이상
     'sell_threshold': -0.02,      # 매도 기준: -2% 이하
-    'initial_cash': INITIAL_CASH,
-    'commission': COMMISSION,
-    'market': get_market('momentum'),
-    'candles_count': get_candles_count('daily'),
+    'initial_cash': 1_000_000,
+    'commission': 0.0005,
+    'market': 'KRW-XRP',
+    'candles_count': 365,
 }
 
 # ============================================
@@ -50,10 +40,10 @@ MOMENTUM_30_CONFIG = {
     'lookback_period': 30,        # 30일 모멘텀
     'buy_threshold': 0.08,        # 매수 기준: 8% 이상
     'sell_threshold': -0.05,      # 매도 기준: -5% 이하
-    'initial_cash': INITIAL_CASH,
-    'commission': COMMISSION,
-    'market': get_market('momentum'),
-    'candles_count': get_candles_count('daily'),
+    'initial_cash': 1_000_000,
+    'commission': 0.0005,
+    'market': 'KRW-BTC',
+    'candles_count': 365,
 }
 
 # ============================================
@@ -64,9 +54,9 @@ DUAL_MOMENTUM_CONFIG = {
     'lookback_period': 20,        # 모멘텀 계산 기간
     'buy_threshold': 0.0,         # 매수 기준: 0% 이상 (상승만)
     'sell_threshold': 0.0,        # 매도 기준: 0% 이하 (하락 시)
-    'initial_cash': INITIAL_CASH,
-    'commission': COMMISSION,
-    'market': get_market('momentum'),
-    'candles_count': get_candles_count('daily'),
+    'initial_cash': 1_000_000,
+    'commission': 0.0005,
+    'market': 'KRW-BTC',
+    'candles_count': 365,
 }
 

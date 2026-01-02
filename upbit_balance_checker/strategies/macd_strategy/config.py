@@ -10,16 +10,6 @@ Trend Filter:
 - 추세에 순응하는 매매만 허용
 """
 
-import sys
-from pathlib import Path
-
-# 프로젝트 루트 경로 추가
-project_root = Path(__file__).parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
-
-from global_config import get_market, get_timeframe, get_candles_count, INITIAL_CASH, COMMISSION
-
 # ============================================================================
 # MACD + 200일 SMA Trend Filter (추천) - 일봉
 # ============================================================================
@@ -40,13 +30,13 @@ MACD_TREND_CONFIG = {
     'min_histogram': 0,           # 최소 Histogram 값
 
     # 백테스팅 설정
-    'initial_cash': INITIAL_CASH,
-    'commission': COMMISSION,
-    'market': get_market('macd'),  # global_config에서 가져옴
+    'initial_cash': 1_000_000,
+    'commission': 0.0005,
+    'market': 'KRW-BTC',  # BTC, XRP, ETH, SOL, DOGE, ADA, DOT, LTC, BCH, XLM, LINK, XMR, EOS, ETC
 
     # 데이터 설정
     'timeframe': 'daily',         # 'daily', 'minute'
-    'candles_count': get_candles_count('daily'),  # global_config에서 가져옴
+    'candles_count': 500,         # 최소 200일 이상 필요
 }
 
 
@@ -75,7 +65,7 @@ MACD_DUAL_TREND_CONFIG = {
     'initial_cash': 1_000_000,
     'commission': 0.0005,
     'market': 'KRW-BTC',
-    'candles_count': get_candles_count('daily'),
+    'candles_count': 500,
 }
 
 
@@ -107,7 +97,7 @@ MACD_VOLUME_CONFIG = {
     'initial_cash': 1_000_000,
     'commission': 0.0005,
     'market': 'KRW-BTC',
-    'candles_count': get_candles_count('daily'),
+    'candles_count': 500,
 }
 
 
@@ -135,7 +125,7 @@ MACD_ONLY_CONFIG = {
 
     # 데이터 설정
     'timeframe': 'daily',
-    'candles_count': get_candles_count('daily'),
+    'candles_count': 365,
 }
 
 
@@ -166,7 +156,7 @@ MACD_15MIN_CONFIG = {
     # 데이터 설정
     'timeframe': 'minute',
     'candle_minutes': 15,         # 15분봉
-    'candles_count': get_candles_count('minutes'),        # 1000개 = 250시간 = 약 10일
+    'candles_count': 1000,        # 1000개 = 250시간 = 약 10일
 }
 
 
@@ -197,7 +187,7 @@ MACD_30MIN_CONFIG = {
     # 데이터 설정
     'timeframe': 'minute',
     'candle_minutes': 30,         # 30분봉
-    'candles_count': get_candles_count('minutes'),        # 1000개 = 500시간 = 약 20일
+    'candles_count': 1000,        # 1000개 = 500시간 = 약 20일
 }
 
 
@@ -228,7 +218,7 @@ MACD_1HOUR_CONFIG = {
     # 데이터 설정
     'timeframe': 'minute',
     'candle_minutes': 60,         # 1시간봉
-    'candles_count': get_candles_count('minutes'),        # 1000개 = 1000시간 = 약 41일
+    'candles_count': 1000,        # 1000개 = 1000시간 = 약 41일
 }
 
 
@@ -254,12 +244,12 @@ MACD_4HOUR_CONFIG = {
     # 백테스팅 설정
     'initial_cash': 1_000_000,
     'commission': 0.0005,
-    'market': get_market('macd'),
+    'market': 'KRW-SOL',
 
     # 데이터 설정
     'timeframe': 'minute',
     'candle_minutes': 240,        # 4시간봉
-    'candles_count': get_candles_count('minutes'),        # 1000개 = 4000시간 = 약 166일
+    'candles_count': 1000,        # 1000개 = 4000시간 = 약 166일
 }
 
 
@@ -290,5 +280,5 @@ MACD_1MIN_CONFIG = {
     # 데이터 설정
     'timeframe': 'minute',
     'candle_minutes': 1,          # 1분봉
-    'candles_count': get_candles_count('minutes'),        # 1000개 = 1000분 = 약 16시간
+    'candles_count': 1000,        # 1000개 = 1000분 = 약 16시간
 }

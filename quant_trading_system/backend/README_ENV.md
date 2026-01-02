@@ -77,3 +77,4 @@ python scripts/check_env.py
 - 실제 운영 환경에서는 환경 변수로 관리하는 것을 권장합니다
 
 
+

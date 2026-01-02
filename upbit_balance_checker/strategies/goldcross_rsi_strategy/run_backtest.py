@@ -4,25 +4,71 @@
 설정 파일(config/goldcross_rsi_config.py)의 값을 변경하여 전략을 조정할 수 있습니다.
 """
 
-import sys
-from pathlib import Path
 import pandas as pd
 import requests
 import time
 from datetime import datetime
 
-# 프로젝트 루트 경로 추가
-project_root = Path(__file__).parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
+from strategy.golden_cross_rsi import GoldenCrossRSIStrategy
+from strategy.backtest_engine import BacktestEngine
 
-from strategies.goldcross_rsi_strategy.strategy import GoldenCrossRSIStrategy
-from core.backtest_engine import BacktestEngine
-from core.data_fetcher import fetch_daily_data, fetch_minute_data
-from strategies.goldcross_rsi_strategy import config as cfg
-from global_config import get_timeframe, get_candles_count
+# 설정 파일 import
+import config.goldcross_rsi_config as cfg
 
 
+def fetch_data(market: str, days: int):
+    """
+    Upbit API에서 데이터 수집
+    
+    Parameters
+    ----------
+    market : str
+        마켓 코드
+    days : int
+        수집할 일수
+    
+    Returns
+    -------
+    pd.DataFrame
+        가격 데이터
+    """
+    url = "https://api.upbit.com/v1/candles/days"
+    headers = {"accept": "application/json"}
+    
+    all_data = []
+    last_timestamp = None
+    
+    print(f"📡 {market} 데이터 수집 중...")
+    
+    while len(all_data) < days:
+        params = {
+            'market': market,
+            'count': min(200, days - len(all_data)),
+        }
+        
+        if last_timestamp:
+            params['to'] = last_timestamp
+        
+        response = requests.get(url, params=params, headers=headers)
+        data = response.json()
+        
+        if not data:
+            break
+        
+        all_data.extend(data)
+        last_timestamp = data[-1]['candle_date_time_utc']
+        
+        print(f"   수집 완료: {len(all_data)}/{days}일")
+        time.sleep(0.1)  # API 요청 제한 방지
+    
+    print(f"✅ 총 {len(all_data)}일 데이터 수집 완료!\n")
+    
+    df = pd.DataFrame(all_data)
+    df['날짜'] = pd.to_datetime(df['candle_date_time_kst'])
+    df = df.sort_values('날짜').reset_index(drop=True)
+    df['종가'] = df['trade_price']
+    
+    return df
 
 
 def main():
@@ -42,22 +88,10 @@ def main():
     print(f"   - 수수료: {cfg.COMMISSION * 100}%")
     print()
     
-    # 데이터 수집 (global_config에서 시간 단위 가져오기)
-    timeframe = get_timeframe('goldcross_rsi')
+    # 데이터 수집
+    df = fetch_data(market=cfg.MARKET, days=cfg.DAYS)
     
-    if timeframe['type'] == 'daily':
-        df = fetch_daily_data(
-            market=cfg.MARKET,
-            days=get_candles_count('daily')
-        )
-    else:
-        df = fetch_minute_data(
-            market=cfg.MARKET,
-            minutes=timeframe['minutes'],
-            count=get_candles_count('minutes')
-        )
-    
-    print(f"📅 분석 기간: {df.index[0].strftime('%Y-%m-%d')} ~ {df.index[-1].strftime('%Y-%m-%d')}")
+    print(f"📅 분석 기간: {df.iloc[0]['날짜'].strftime('%Y-%m-%d')} ~ {df.iloc[-1]['날짜'].strftime('%Y-%m-%d')}")
     print(f"📊 시작 가격: {df.iloc[0]['종가']:,.0f}원")
     print(f"📊 종료 가격: {df.iloc[-1]['종가']:,.0f}원")
     print()

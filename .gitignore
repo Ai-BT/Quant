@@ -3,11 +3,12 @@
 # ============================================
 
 # API 설정 파일 (민감 정보 보호)
-env_upbit.txt
-backtest/env_upbit.txt
 .env
 .env.local
 .env.*.local
+env_*.txt
+env_upbit.txt
+backtest/env_upbit.txt
 
 # Python 관련
 # ------------
@@ -24,7 +25,6 @@ venv/
 env/
 ENV/
 end2end_venv/
-quant_env/
 
 # 배포
 build/

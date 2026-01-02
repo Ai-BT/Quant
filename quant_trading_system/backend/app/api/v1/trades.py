@@ -34,3 +34,4 @@ async def get_trade(trade_id: str):
     return TradeResponse(**trade)
 
 
+

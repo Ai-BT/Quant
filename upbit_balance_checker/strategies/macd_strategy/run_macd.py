@@ -8,22 +8,21 @@ Usage:
 import sys
 from pathlib import Path
 
-# 프로젝트 루트 경로를 Python 경로에 추가 (반드시 import 전에 실행)
-project_root = Path(__file__).resolve().parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
+# 프로젝트 루트를 Python 경로에 추가
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
 
 # ============================================================================
 # 여기서 사용할 설정 선택 (auto-import 정리 방지용 주석 포함)
 # ============================================================================
-# from strategies.macd_strategy.config import MACD_TREND_CONFIG as cfg      # 일봉 # noqa: E402
-from strategies.macd_strategy.config import MACD_4HOUR_CONFIG as cfg      # 15분봉  # noqa: E402
+# from strategies.macd_strategy.config import MACD_TREND_CONFIG as cfg      # 일봉 
+from strategies.macd_strategy.config import MACD_TREND_CONFIG as cfg      # 15분봉
 # from strategies.macd_strategy.config import MACD_1MIN_CONFIG as cfg        # 1분봉
 
-from core.backtest_engine import BacktestEngine  # noqa: E402
-from core.data_fetcher import fetch_daily_data, fetch_minute_data  # noqa: E402
-from core.logger import save_results_to_file, save_trades_to_csv, setup_logger  # noqa: E402
-from strategies.macd_strategy.strategy import MACDTrendStrategy  # noqa: E402
+from core.backtest_engine import BacktestEngine
+from core.data_fetcher import fetch_daily_data, fetch_minute_data
+from core.logger import save_results_to_file
+from strategies.macd_strategy.strategy import MACDTrendStrategy  
 
 
 def print_separator(char="=", length=70):
@@ -80,13 +79,6 @@ def main():
         print(f"   거래량 MA: {config.get('volume_ma_period', 20)}일")
         print(f"   최소 배수: {config.get('volume_multiplier', 1.2)}배")
         print()
-
-    # 로거 설정
-    logger = setup_logger(
-        strategy_name=config['name'],
-        market=config['market'],
-        output_dir="logs"
-    )
 
     # 데이터 가져오기
     print("📥 데이터 로딩 중...")
@@ -221,7 +213,6 @@ def main():
 
     # 결과 파일 저장
     save_results_to_file(result, config, stats, output_dir="results")
-    save_trades_to_csv(result, config, output_dir="results")
 
     print()
     print("✅ 백테스팅 완료!")

@@ -185,16 +185,52 @@ def save_results_to_file(result: dict, config: dict, stats: dict, output_dir: st
         f.write("\n")
         
         # 거래 내역 (전체)
-        if result['num_trades'] > 0:
+        if result['num_trades'] > 0 and len(result['trades']) > 0:
             f.write("=" * 70 + "\n")
-            f.write(f"📋 전체 거래 내역 (총 {result['num_trades']}건)\n")
-            f.write("=" * 70 + "\n")
+            f.write(f"📋 전체 거래 내역 (총 {len(result['trades'])}건)\n")
+            f.write("=" * 70 + "\n\n")
+            
             for i, trade in enumerate(result['trades'], 1):
-                trade_type = "매수" if trade.type == 'BUY' else "매도"
-                f.write(f"{i:3d}. {trade.date.strftime('%Y-%m-%d')} | "
-                       f"{trade_type:>4} | 가격: {trade.price:>12,.0f}원 | "
-                       f"수량: {trade.quantity:>10.8f} | "
-                       f"포트폴리오: {trade.portfolio_value:>12,.0f}원\n")
+                # dict 또는 객체 모두 처리
+                if isinstance(trade, dict):
+                    trade_type = trade['type']
+                    trade_date = trade['date']
+                    trade_price = trade['price']
+                    trade_quantity = trade['quantity']
+                    trade_portfolio = trade['portfolio_value']
+                    trade_profit = trade.get('profit', None)
+                    trade_profit_rate = trade.get('profit_rate', None)
+                else:
+                    trade_type = trade.type
+                    trade_date = trade.date
+                    trade_price = trade.price
+                    trade_quantity = trade.quantity
+                    trade_portfolio = trade.portfolio_value
+                    trade_profit = None
+                    trade_profit_rate = None
+                
+                # 날짜 포맷팅
+                if hasattr(trade_date, 'strftime'):
+                    date_str = trade_date.strftime('%Y-%m-%d %H:%M:%S')
+                else:
+                    date_str = str(trade_date)
+                
+                # 거래 유형
+                type_emoji = "🟢" if trade_type == 'BUY' else "🔴"
+                type_text = "매수" if trade_type == 'BUY' else "매도"
+                
+                f.write(f"[거래 #{i}] {type_emoji} {type_text}\n")
+                f.write(f"  날짜: {date_str}\n")
+                f.write(f"  가격: {trade_price:,.0f}원\n")
+                f.write(f"  수량: {trade_quantity:.8f}\n")
+                f.write(f"  포트폴리오 가치: {trade_portfolio:,.0f}원\n")
+                
+                # 매도 시 수익률 표시
+                if trade_type == 'SELL' and trade_profit is not None:
+                    f.write(f"  수익: {trade_profit:+,.0f}원\n")
+                    f.write(f"  수익률: {trade_profit_rate:+.2f}%\n")
+                
+                f.write("\n")
     
     print(f"💾 결과 파일 저장: {result_path}")
 
