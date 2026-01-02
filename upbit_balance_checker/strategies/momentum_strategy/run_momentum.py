@@ -52,7 +52,7 @@ def main():
         days=config['candles_count']
     )
     
-    print(f"📅 분석 기간: {df.iloc[0]['날짜'].strftime('%Y-%m-%d')} ~ {df.iloc[-1]['날짜'].strftime('%Y-%m-%d')}")
+    print(f"📅 분석 기간: {df.index[0].strftime('%Y-%m-%d')} ~ {df.index[-1].strftime('%Y-%m-%d')}")
     print(f"📊 시작 가격: {df.iloc[0]['종가']:,.0f}원")
     print(f"📊 종료 가격: {df.iloc[-1]['종가']:,.0f}원")
     
@@ -106,10 +106,9 @@ def main():
         print("-" * 70)
         for trade in result['trades'][-10:]:
             trade_type = "매수" if trade.type == 'BUY' else "매도"
-            # 해당 날짜의 모멘텀 찾기
-            idx = df[df['날짜'] == trade.date].index
-            if len(idx) > 0 and idx[0] in signals.index:
-                momentum = signals.loc[idx[0], 'momentum']
+            # 해당 날짜의 모멘텀 찾기 (날짜가 인덱스이므로 직접 인덱스로 접근)
+            if trade.date in df.index and trade.date in signals.index:
+                momentum = signals.loc[trade.date, 'momentum']
                 momentum_str = f"모멘텀: {momentum*100:+6.2f}%" if pd.notna(momentum) else "모멘텀: N/A"
             else:
                 momentum_str = "모멘텀: N/A"

@@ -24,6 +24,7 @@ venv/
 env/
 ENV/
 end2end_venv/
+quant_env/
 
 # 배포
 build/

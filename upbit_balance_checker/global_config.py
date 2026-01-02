@@ -15,13 +15,13 @@ DEFAULT_MARKET = 'KRW-SOL'
 
 # 기본 시간 단위 (모든 전략에 적용)
 # 옵션: 'daily', '240min', '60min', '30min', '15min', '5min', '1min'
-DEFAULT_TIMEFRAME = '60min'  # 1시간봉
+DEFAULT_TIMEFRAME = '240min'  # 1시간봉
 
 # 기본 캔들 개수 (모든 전략에 적용)
 # 일봉: 일봉 데이터 개수, 분봉: 모든 분봉(4시간/1시간/30분/15분/5분/1분) 데이터 개수
 DEFAULT_CANDLES_COUNT = {
     'daily': 365,      # 일봉: 365개 (약 1년)
-    'minutes': 1000,   # 분봉: 1000개
+    'minutes': 2000,   # 분봉: 1000개
 }
 
 # 초기 자본금
@@ -38,7 +38,6 @@ COMMISSION = 0.0005          # 0.05%
 STRATEGY_MARKETS = {
     'sma_5_20': None,           # None = DEFAULT_MARKET 사용
     'sma_20_50': None,          # None = DEFAULT_MARKET 사용
-    'sma_minute': None,          # None = DEFAULT_MARKET 사용
     'macd': None,                # None = DEFAULT_MARKET 사용
     'momentum': None,            # None = DEFAULT_MARKET 사용
     'goldcross_rsi': None,       # None = DEFAULT_MARKET 사용
@@ -49,7 +48,6 @@ STRATEGY_MARKETS = {
 STRATEGY_TIMEFRAMES = {
     'sma_5_20': None,           # None = DEFAULT_TIMEFRAME 사용
     'sma_20_50': None,          # None = DEFAULT_TIMEFRAME 사용
-    'sma_minute': None,         # None = DEFAULT_TIMEFRAME 사용
     'macd': None,               # None = DEFAULT_TIMEFRAME 사용
     'momentum': None,            # None = DEFAULT_TIMEFRAME 사용
     'goldcross_rsi': None,      # None = DEFAULT_TIMEFRAME 사용

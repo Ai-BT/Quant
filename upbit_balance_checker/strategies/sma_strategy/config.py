@@ -112,38 +112,3 @@ def get_sma20_50_config():
 # 하위 호환성을 위한 변수 (함수 호출로 동적 생성)
 SMA20_50_CONFIG = _ConfigProxy(_get_sma20_50_config)
 
-# ============================================
-# SMA 5/30 전략 설정 (분봉)
-# ============================================
-def _get_sma_minute_config():
-    """SMA 분봉 전략 설정 (global_config에서 시간 단위 가져옴)"""
-    timeframe = get_timeframe('sma_minute')
-    config = {
-        'name': 'SMA 5분/30분 골든크로스',
-        'fast_period': 5,
-        'slow_period': 30,
-        'trade_interval': 60,  # 거래 확인 간격 (분)
-        'initial_cash': INITIAL_CASH,
-        'commission': COMMISSION,
-        'market': get_market('sma_minute'),
-    }
-    
-    if timeframe['type'] == 'daily':
-        config['candle_type'] = 'days'
-        config['candles_count'] = get_candles_count('daily')
-        config['name'] += ' (일봉)'
-    else:
-        config['candle_type'] = 'minutes'
-        config['candle_minutes'] = timeframe['minutes']
-        config['candles_count'] = get_candles_count('minutes')
-        config['name'] += f" ({timeframe['description']})"
-    
-    return config
-
-def get_sma_minute_config():
-    """SMA 분봉 전략 설정 (매번 최신 global_config에서 가져옴)"""
-    return _get_sma_minute_config()
-
-# 하위 호환성을 위한 변수 (함수 호출로 동적 생성)
-SMA_MINUTE_CONFIG = _ConfigProxy(_get_sma_minute_config)
-

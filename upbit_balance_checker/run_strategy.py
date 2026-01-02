@@ -26,9 +26,6 @@ def _get_strategy_name(path: str) -> str:
         elif 'sma_strategy/run_sma20_50' in path:
             from strategies.sma_strategy.config import SMA20_50_CONFIG
             return SMA20_50_CONFIG['name']
-        elif 'sma_strategy/run_sma_minute' in path:
-            from strategies.sma_strategy.config import SMA_MINUTE_CONFIG
-            return SMA_MINUTE_CONFIG['name']
         elif 'macd_strategy' in path:
             return 'MACD + Trend Filter'
         elif 'momentum_strategy' in path:
@@ -51,21 +48,16 @@ STRATEGIES = {
         'description': '중기 이동평균선(20)과 장기 이동평균선(50) 크로스 전략'
     },
     '3': {
-        'name': None,  # 동적으로 가져옴
-        'path': 'strategies/sma_strategy/run_sma_minute.py',
-        'description': '분봉 기반 초단기 트레이딩 전략'
-    },
-    '4': {
         'name': 'MACD + Trend Filter',
         'path': 'strategies/macd_strategy/run_macd.py',
         'description': 'MACD 지표와 추세 필터를 결합한 전략'
     },
-    '5': {
+    '4': {
         'name': 'Momentum 전략',
         'path': 'strategies/momentum_strategy/run_momentum.py',
         'description': '모멘텀 지표 기반 전략'
     },
-    '6': {
+    '5': {
         'name': 'Gold Cross + RSI 전략',
         'path': 'strategies/goldcross_rsi_strategy/run_backtest.py',
         'description': '골든크로스와 RSI를 결합한 전략'
