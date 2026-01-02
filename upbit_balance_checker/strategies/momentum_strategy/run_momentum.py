@@ -123,12 +123,25 @@ def main():
     print("💡 최종 평가")
     print("=" * 70)
     
+    excess = result['total_return'] - result['buy_hold_return']
+    
     if result['total_return'] > result['buy_hold_return']:
-        excess = result['total_return'] - result['buy_hold_return']
-        print(f"✅ 전략이 Buy & Hold보다 {excess:.2f}%p 더 수익을 냈습니다!")
+        if result['total_return'] > 0 and result['buy_hold_return'] > 0:
+            # 둘 다 수익
+            print(f"✅ 전략이 Buy & Hold보다 {excess:.2f}%p 더 수익을 냈습니다!")
+        elif result['total_return'] > 0 and result['buy_hold_return'] < 0:
+            # 전략은 수익, Buy & Hold는 손실
+            print(f"✅ 전략이 수익({result['total_return']:.2f}%)을 냈고, Buy & Hold({result['buy_hold_return']:.2f}%)보다 {excess:.2f}%p 더 좋습니다!")
+        else:
+            # 둘 다 손실이지만 전략이 덜 손실
+            print(f"✅ 전략이 Buy & Hold보다 {excess:.2f}%p 덜 손실을 냈습니다! (전략: {result['total_return']:.2f}%, Buy & Hold: {result['buy_hold_return']:.2f}%)")
     else:
-        deficit = result['buy_hold_return'] - result['total_return']
-        print(f"⚠️  전략이 Buy & Hold보다 {deficit:.2f}%p 적게 수익을 냈습니다.")
+        deficit = -excess
+        if result['total_return'] < 0 and result['buy_hold_return'] < 0:
+            # 둘 다 손실이지만 전략이 더 손실
+            print(f"⚠️  전략이 Buy & Hold보다 {deficit:.2f}%p 더 손실을 냈습니다. (전략: {result['total_return']:.2f}%, Buy & Hold: {result['buy_hold_return']:.2f}%)")
+        else:
+            print(f"⚠️  전략이 Buy & Hold보다 {deficit:.2f}%p 적게 수익을 냈습니다.")
     
     if result['sharpe_ratio'] > 1:
         print(f"✅ 샤프 비율 {result['sharpe_ratio']:.2f}: 위험 대비 수익이 좋습니다!")

@@ -13,14 +13,15 @@ sys.path.append(str(project_root))
 
 import pandas as pd
 from strategies.sma_strategy.strategy import SMAStrategy
-from strategies.sma_strategy.config import SMA5_20_CONFIG
+from strategies.sma_strategy.config import get_sma5_20_config
 from core.backtest_engine import BacktestEngine
-from core.data_fetcher import fetch_daily_data
+from core.data_fetcher import fetch_daily_data, fetch_minute_data
 
 
 def main():
     """메인 함수"""
-    config = SMA5_20_CONFIG
+    # 매번 최신 설정을 가져오기 위해 함수 호출
+    config = get_sma5_20_config()
     
     print("=" * 70)
     print(f"🚀 {config['name']}")
@@ -35,13 +36,20 @@ def main():
     print(f"   - 수수료: {config['commission'] * 100}%")
     print()
     
-    # 데이터 수집
-    df = fetch_daily_data(
-        market=config['market'],
-        days=config['candles_count']
-    )
+    # 데이터 수집 (시간 단위에 따라 선택)
+    if config['candle_type'] == 'days':
+        df = fetch_daily_data(
+            market=config['market'],
+            days=config['candles_count']
+        )
+    else:
+        df = fetch_minute_data(
+            market=config['market'],
+            minutes=config['candle_minutes'],
+            count=config['candles_count']
+        )
     
-    print(f"📅 분석 기간: {df.iloc[0]['날짜'].strftime('%Y-%m-%d')} ~ {df.iloc[-1]['날짜'].strftime('%Y-%m-%d')}")
+    print(f"📅 분석 기간: {df.index[0].strftime('%Y-%m-%d')} ~ {df.index[-1].strftime('%Y-%m-%d')}")
     print(f"📊 시작 가격: {df.iloc[0]['종가']:,.0f}원")
     print(f"📊 종료 가격: {df.iloc[-1]['종가']:,.0f}원")
     print()
@@ -94,12 +102,25 @@ def main():
     print("💡 최종 평가")
     print("=" * 70)
     
+    excess = result['total_return'] - result['buy_hold_return']
+    
     if result['total_return'] > result['buy_hold_return']:
-        excess = result['total_return'] - result['buy_hold_return']
-        print(f"✅ 전략이 Buy & Hold보다 {excess:.2f}%p 더 수익을 냈습니다!")
+        if result['total_return'] > 0 and result['buy_hold_return'] > 0:
+            # 둘 다 수익
+            print(f"✅ 전략이 Buy & Hold보다 {excess:.2f}%p 더 수익을 냈습니다!")
+        elif result['total_return'] > 0 and result['buy_hold_return'] < 0:
+            # 전략은 수익, Buy & Hold는 손실
+            print(f"✅ 전략이 수익({result['total_return']:.2f}%)을 냈고, Buy & Hold({result['buy_hold_return']:.2f}%)보다 {excess:.2f}%p 더 좋습니다!")
+        else:
+            # 둘 다 손실이지만 전략이 덜 손실
+            print(f"✅ 전략이 Buy & Hold보다 {excess:.2f}%p 덜 손실을 냈습니다! (전략: {result['total_return']:.2f}%, Buy & Hold: {result['buy_hold_return']:.2f}%)")
     else:
-        deficit = result['buy_hold_return'] - result['total_return']
-        print(f"⚠️  전략이 Buy & Hold보다 {deficit:.2f}%p 적게 수익을 냈습니다.")
+        deficit = -excess
+        if result['total_return'] < 0 and result['buy_hold_return'] < 0:
+            # 둘 다 손실이지만 전략이 더 손실
+            print(f"⚠️  전략이 Buy & Hold보다 {deficit:.2f}%p 더 손실을 냈습니다. (전략: {result['total_return']:.2f}%, Buy & Hold: {result['buy_hold_return']:.2f}%)")
+        else:
+            print(f"⚠️  전략이 Buy & Hold보다 {deficit:.2f}%p 적게 수익을 냈습니다.")
     
     if result['sharpe_ratio'] > 1:
         print(f"✅ 샤프 비율 {result['sharpe_ratio']:.2f}: 위험 대비 수익이 좋습니다!")

@@ -4,16 +4,21 @@
 설정 파일(config/goldcross_rsi_config.py)의 값을 변경하여 전략을 조정할 수 있습니다.
 """
 
+import sys
+from pathlib import Path
 import pandas as pd
 import requests
 import time
 from datetime import datetime
 
-from strategy.golden_cross_rsi import GoldenCrossRSIStrategy
-from strategy.backtest_engine import BacktestEngine
+# 프로젝트 루트 경로 추가
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
-# 설정 파일 import
-import config.goldcross_rsi_config as cfg
+from strategies.goldcross_rsi_strategy.strategy import GoldenCrossRSIStrategy
+from core.backtest_engine import BacktestEngine
+from strategies.goldcross_rsi_strategy import config as cfg
 
 
 def fetch_data(market: str, days: int):
@@ -65,8 +70,15 @@ def fetch_data(market: str, days: int):
     
     df = pd.DataFrame(all_data)
     df['날짜'] = pd.to_datetime(df['candle_date_time_kst'])
-    df = df.sort_values('날짜').reset_index(drop=True)
+    df = df.sort_values('날짜')
     df['종가'] = df['trade_price']
+    df['시가'] = df['opening_price']
+    df['고가'] = df['high_price']
+    df['저가'] = df['low_price']
+    df['거래량'] = df['candle_acc_trade_volume']
+    
+    # 날짜를 인덱스로 설정 (다른 전략들과 일관성 유지)
+    df = df.set_index('날짜')
     
     return df
 
@@ -91,7 +103,7 @@ def main():
     # 데이터 수집
     df = fetch_data(market=cfg.MARKET, days=cfg.DAYS)
     
-    print(f"📅 분석 기간: {df.iloc[0]['날짜'].strftime('%Y-%m-%d')} ~ {df.iloc[-1]['날짜'].strftime('%Y-%m-%d')}")
+    print(f"📅 분석 기간: {df.index[0].strftime('%Y-%m-%d')} ~ {df.index[-1].strftime('%Y-%m-%d')}")
     print(f"📊 시작 가격: {df.iloc[0]['종가']:,.0f}원")
     print(f"📊 종료 가격: {df.iloc[-1]['종가']:,.0f}원")
     print()
