@@ -1,0 +1,38 @@
+Quant/
+├── README.md
+├── .gitignore
+├── requirements.txt
+│
+├── data/                        # 시장 데이터
+│   ├── raw/                     # 원본 (CSV 등)
+│   └── processed/               # 전처리된 데이터
+│
+├── notebooks/                   # 분석 노트북
+│   ├── exploratory/             # 탐색 분석
+│   └── experiments/             # 전략 실험
+│
+├── src/                         # 핵심 라이브러리
+│   ├── data/                    # 데이터 수집
+│   │   └── fetcher.py
+│   ├── strategies/              # 트레이딩 전략
+│   │   └── sma_crossover.py
+│   ├── backtesting/             # 백테스팅 엔진
+│   │   └── engine.py
+│   └── utils/                   # 유틸리티
+│       └── api_client.py
+│
+├── scripts/                     # 실행 스크립트
+│   ├── check_balance.py         # 잔고 확인
+│   ├── run_backtest.py          # 백테스트
+│   └── live_trading.py          # 실전 매매
+│
+├── configs/                     # 설정
+│   └── api_config.yaml
+│
+├── models/                      # 학습된 모델 (ML 사용 시)
+│
+├── tests/                       # 테스트
+│
+└── outputs/                     # 결과
+    ├── backtest_results/
+    └── figures/

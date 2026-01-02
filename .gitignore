@@ -25,6 +25,8 @@ venv/
 env/
 ENV/
 end2end_venv/
+coin_env/
+upbit_server_env/
 
 # 배포
 build/

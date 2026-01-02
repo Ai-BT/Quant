@@ -1,0 +1,38 @@
+# Core dependencies
+pandas>=2.0.0
+numpy>=1.24.0
+requests>=2.31.0
+
+# API clients
+PyJWT>=2.8.0
+python-dotenv>=1.0.0
+pyupbit>=0.2.30
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Technical indicators
+pandas-ta>=0.3.14b
+
+# Machine Learning / AI
+openai>=1.0.0
+
+# Task scheduling
+schedule>=1.2.0
+
+# Web interface (optional)
+streamlit>=1.28.0
+
+# Jupyter notebook
+jupyter>=1.0.0
+ipykernel>=6.25.0
+
+
+
+
+
+
+
+
+
